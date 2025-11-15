@@ -91,9 +91,39 @@ DBRefactor_AI_Agent/
 
 ## Installation
 
+### 🐳 Docker (Recommended)
+
+The easiest way to run the application is using Docker:
+
+```bash
+# Clone the repository
+git clone <repository-url>
+cd DBRefactor_AI_Agent
+
+# Create environment file
+cp .env.docker .env
+# Edit .env with your configuration
+
+# Start all services
+make up
+
+# Or use docker-compose directly
+docker-compose up -d
+```
+
+**Access the application**:
+- **Web UI**: http://localhost:3000
+- **Backend API**: http://localhost:8000
+- **API Docs**: http://localhost:8000/docs
+
+For detailed Docker documentation, see [DOCKER.md](./DOCKER.md)
+
+### 📦 Manual Installation
+
 ### Prerequisites
 
 - Python 3.10+
+- Node.js 18+
 - Database drivers for your source and target databases
 - (Optional) Redis for caching and task queue
 

@@ -1,0 +1,104 @@
+version: '3.8'
+
+# Development docker-compose configuration with hot-reloading
+services:
+  # FastAPI Backend (Development)
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dbrefactor-backend-dev
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=True
+      - ENVIRONMENT=development
+      - LOG_LEVEL=DEBUG
+      - REDIS_HOST=redis
+      - TARGET_DB_HOST=postgres
+      - APP_DB_HOST=mysql
+    volumes:
+      # Mount source code for hot-reloading
+      - ./app:/app/app
+      - ./requirements.txt:/app/requirements.txt
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    depends_on:
+      - redis
+      - postgres
+      - mysql
+    networks:
+      - dbrefactor-network
+    restart: unless-stopped
+
+  # Next.js Frontend (Development)
+  frontend:
+    build:
+      context: ./ui
+      dockerfile: Dockerfile.dev
+      target: development
+    container_name: dbrefactor-frontend-dev
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    volumes:
+      # Mount source code for hot-reloading
+      - ./ui:/app
+      - /app/node_modules
+      - /app/.next
+    command: npm run dev
+    depends_on:
+      - backend
+    networks:
+      - dbrefactor-network
+    restart: unless-stopped
+
+  # PostgreSQL
+  postgres:
+    image: postgres:15-alpine
+    container_name: dbrefactor-postgres-dev
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-dev-data:/var/lib/postgresql/data
+    networks:
+      - dbrefactor-network
+
+  # MySQL
+  mysql:
+    image: mysql:8.0
+    container_name: dbrefactor-mysql-dev
+    environment:
+      - MYSQL_ROOT_PASSWORD=mysql
+      - MYSQL_DATABASE=migration_tracker
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-dev-data:/var/lib/mysql
+    networks:
+      - dbrefactor-network
+
+  # Redis
+  redis:
+    image: redis:7-alpine
+    container_name: dbrefactor-redis-dev
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-dev-data:/data
+    networks:
+      - dbrefactor-network
+
+volumes:
+  postgres-dev-data:
+  mysql-dev-data:
+  redis-dev-data:
+
+networks:
+  dbrefactor-network:
+    driver: bridge
