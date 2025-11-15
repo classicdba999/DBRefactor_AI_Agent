@@ -4,7 +4,7 @@ Configuration management for DBRefactor AI Agent.
 Uses pydantic-settings for environment variable management.
 """
 
-from typing import Optional
+from typing import Optional, List
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field
 
@@ -97,7 +97,7 @@ class AppConfig(BaseSettings):
 
     # Security
     secret_key: str = Field(default="change-this-in-production")
-    cors_origins: list[str] = Field(default=["*"])
+    cors_origins: List[str] = Field(default=["*"])
 
     # Agent Configuration
     max_agent_retries: int = Field(default=3)

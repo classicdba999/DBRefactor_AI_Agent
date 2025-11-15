@@ -34,7 +34,8 @@ class ConnectionManager:
         logger.info("websocket_connected", total_connections=len(self.active_connections))
 
     def disconnect(self, websocket: WebSocket):
-        self.active_connections.remove(websocket)
+        if websocket in self.active_connections:
+            self.active_connections.remove(websocket)
         logger.info("websocket_disconnected", total_connections=len(self.active_connections))
 
     async def broadcast(self, message: dict):
@@ -105,7 +106,16 @@ async def websocket_endpoint(websocket: WebSocket):
         while True:
             # Receive messages from client
             data = await websocket.receive_text()
-            message = json.loads(data)
+
+            try:
+                message = json.loads(data)
+            except json.JSONDecodeError as e:
+                logger.warning("invalid_json_received", error=str(e), data=data[:100])
+                await websocket.send_json({
+                    "type": "error",
+                    "message": "Invalid JSON format"
+                })
+                continue
 
             # Handle different message types
             if message.get("type") == "ping":
@@ -125,7 +135,12 @@ async def websocket_endpoint(websocket: WebSocket):
 
 
 # Serve static files (React build)
-ui_dist_path = os.path.join(os.path.dirname(__file__), "..", "ui", "dist")
+# Use absolute path for better Docker compatibility
+ui_dist_path = os.environ.get(
+    "UI_DIST_PATH",
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "ui", "dist"))
+)
+
 if os.path.exists(ui_dist_path):
     app.mount("/assets", StaticFiles(directory=os.path.join(ui_dist_path, "assets")), name="assets")
 
@@ -138,7 +153,7 @@ if os.path.exists(ui_dist_path):
     async def catch_all(full_path: str):
         """Catch-all route for React Router"""
         # Don't catch API routes or WebSocket
-        if full_path.startswith("api/") or full_path.startswith("ws"):
+        if full_path.startswith("api") or full_path.startswith("/api") or full_path.startswith("ws"):
             return {"error": "Not found"}
 
         file_path = os.path.join(ui_dist_path, full_path)
@@ -146,6 +161,8 @@ if os.path.exists(ui_dist_path):
             return FileResponse(file_path)
 
         return FileResponse(os.path.join(ui_dist_path, "index.html"))
+else:
+    logger.warning("ui_dist_not_found", path=ui_dist_path)
 
 
 @app.get("/api/v1/info")
