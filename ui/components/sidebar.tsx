@@ -25,56 +25,40 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <div className="flex flex-col w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
+    <div className="flex flex-col w-14 bg-gray-900 border-r border-gray-800">
       {/* Logo */}
-      <div className="flex items-center h-16 px-6 border-b border-gray-200 dark:border-gray-700">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-            <Database className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <h1 className="text-lg font-bold text-gray-900 dark:text-white">
-              DBRefactor AI
-            </h1>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              Migration Agent
-            </p>
-          </div>
-        </div>
+      <div className="flex items-center justify-center h-14 border-b border-gray-800">
+        <Database className="w-6 h-6 text-blue-400" />
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-4 space-y-1">
+      <nav className="flex-1 py-2 space-y-1">
         {navigation.map((item) => {
           const isActive = pathname === item.href;
           return (
             <Link
               key={item.name}
               href={item.href}
+              title={item.name}
               className={cn(
-                "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                "flex items-center justify-center h-11 mx-1 rounded transition-all group relative",
                 isActive
-                  ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
-                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  ? "bg-blue-600 text-white"
+                  : "text-gray-400 hover:bg-gray-800 hover:text-gray-200"
               )}
             >
               <item.icon className="w-5 h-5" />
-              {item.name}
+              <span className="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition-opacity z-50">
+                {item.name}
+              </span>
             </Link>
           );
         })}
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-        <div className="px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
-          <p className="text-xs text-gray-600 dark:text-gray-400">
-            Version 1.0.0
-          </p>
-          <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-            Framework Status: Active
-          </p>
-        </div>
+      <div className="h-14 flex items-center justify-center border-t border-gray-800">
+        <div className="w-2 h-2 rounded-full bg-green-500"></div>
       </div>
     </div>
   );

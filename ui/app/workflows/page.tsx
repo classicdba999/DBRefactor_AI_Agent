@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Workflow, Plus, Play, CheckCircle, XCircle, Clock, Loader2 } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Plus, Play, CheckCircle, XCircle, Clock, Loader2, ChevronRight } from "lucide-react";
 
 interface WorkflowItem {
   workflow_id: string;
@@ -38,136 +38,126 @@ export default function WorkflowsPage() {
       await fetch(`/api/v1/workflows/${workflowId}/execute`, {
         method: "POST",
       });
-      // Refresh workflows
       setTimeout(fetchWorkflows, 1000);
     } catch (error) {
       console.error("Failed to execute workflow:", error);
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "completed":
-        return <CheckCircle className="w-5 h-5 text-green-600" />;
-      case "failed":
-        return <XCircle className="w-5 h-5 text-red-600" />;
-      case "running":
-        return <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />;
-      default:
-        return <Clock className="w-5 h-5 text-gray-400" />;
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "completed":
-        return "bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400";
-      case "failed":
-        return "bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400";
-      case "running":
-        return "bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400";
-      default:
-        return "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-400";
-    }
-  };
-
   if (loading) {
     return (
-      <div className="p-8">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/4 mb-4"></div>
-          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mb-8"></div>
+      <div className="h-screen overflow-auto bg-gray-50">
+        <div className="sticky top-0 bg-white border-b px-5 py-3">
+          <div className="h-5 bg-gray-200 rounded w-24 animate-pulse"></div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Workflows
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Create and manage migration workflows
-          </p>
-        </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
-          <Plus className="w-4 h-4" />
-          New Workflow
+    <div className="h-screen overflow-auto bg-gray-50">
+      {/* Header */}
+      <div className="sticky top-0 bg-white border-b px-5 py-3 z-10 flex items-center justify-between">
+        <h1 className="text-lg font-semibold text-gray-900">Workflows</h1>
+        <button className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-medium transition-colors">
+          <Plus className="w-3.5 h-3.5" />
+          New
         </button>
       </div>
 
-      {/* Workflows List */}
-      <div className="space-y-4">
-        {workflows.map((workflow) => (
-          <Card key={workflow.workflow_id}>
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <CardTitle className="flex items-center gap-2">
-                    <Workflow className="w-5 h-5" />
-                    {workflow.name}
-                  </CardTitle>
-                  <CardDescription className="mt-2">
-                    {workflow.description}
-                  </CardDescription>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                      workflow.status
-                    )}`}
-                  >
-                    {getStatusIcon(workflow.status)}
-                    {workflow.status}
-                  </span>
-                  {workflow.status === "pending" && (
-                    <button
-                      onClick={() => executeWorkflow(workflow.workflow_id)}
-                      className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                      title="Execute workflow"
-                    >
-                      <Play className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                    </button>
-                  )}
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-6 text-sm text-gray-600 dark:text-gray-400">
-                <div>
-                  <span className="font-medium">{workflow.total_steps}</span> steps
-                </div>
-                <div>
-                  Created{" "}
-                  {new Date(workflow.created_at).toLocaleDateString()}
-                </div>
-                <div className="ml-auto">
-                  <button className="text-blue-600 hover:text-blue-700 font-medium">
-                    View Details →
-                  </button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {workflows.length === 0 && (
+      <div className="p-4">
         <Card>
-          <CardContent className="py-12 text-center">
-            <Workflow className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
-              No workflows created yet
-            </p>
-            <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
-              Create Your First Workflow
-            </button>
+          <CardHeader className="pb-2 pt-3 px-4">
+            <CardTitle className="text-sm font-semibold">All Workflows</CardTitle>
+          </CardHeader>
+          <CardContent className="px-0 pb-0">
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="border-y bg-gray-50 text-gray-600">
+                  <th className="text-left py-2 px-4 font-medium">Workflow</th>
+                  <th className="text-left py-2 px-4 font-medium">Status</th>
+                  <th className="text-right py-2 px-4 font-medium">Steps</th>
+                  <th className="text-left py-2 px-4 font-medium">Created</th>
+                  <th className="text-center py-2 px-4 font-medium">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {workflows.map((workflow) => (
+                  <tr key={workflow.workflow_id} className="border-b last:border-0 hover:bg-gray-50 transition-colors">
+                    <td className="py-3 px-4">
+                      <div>
+                        <div className="font-medium text-gray-900">
+                          {workflow.name}
+                        </div>
+                        <div className="text-[10px] text-gray-500 mt-0.5 line-clamp-1">
+                          {workflow.description}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-3 px-4">
+                      {workflow.status === "completed" && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-green-100 text-green-800">
+                          <CheckCircle className="w-3 h-3" />
+                          Completed
+                        </span>
+                      )}
+                      {workflow.status === "failed" && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-red-100 text-red-800">
+                          <XCircle className="w-3 h-3" />
+                          Failed
+                        </span>
+                      )}
+                      {workflow.status === "running" && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-100 text-blue-800">
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                          Running
+                        </span>
+                      )}
+                      {workflow.status === "pending" && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-gray-100 text-gray-600">
+                          <Clock className="w-3 h-3" />
+                          Pending
+                        </span>
+                      )}
+                    </td>
+                    <td className="text-right py-3 px-4 text-gray-900 font-medium">
+                      {workflow.total_steps}
+                    </td>
+                    <td className="py-3 px-4 text-gray-600">
+                      {new Date(workflow.created_at).toLocaleDateString()}
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="flex items-center justify-center gap-1">
+                        {workflow.status === "pending" && (
+                          <button
+                            onClick={() => executeWorkflow(workflow.workflow_id)}
+                            className="p-1.5 rounded bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors"
+                            title="Execute"
+                          >
+                            <Play className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                        <button
+                          className="p-1.5 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+                          title="View Details"
+                        >
+                          <ChevronRight className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {workflows.length === 0 && (
+              <div className="py-12 text-center text-sm text-gray-500">
+                No workflows created yet
+              </div>
+            )}
           </CardContent>
         </Card>
-      )}
+      </div>
     </div>
   );
 }
