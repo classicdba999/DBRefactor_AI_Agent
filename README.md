@@ -122,6 +122,23 @@ DBRefactor_AI_Agent/
    # Edit .env with your database credentials and API keys
    ```
 
+5. **Start the FastAPI backend**:
+   ```bash
+   uvicorn app.main:app --reload
+   ```
+
+6. **Start the Next.js UI** (in a separate terminal):
+   ```bash
+   cd ui
+   npm install
+   npm run dev
+   ```
+
+7. **Access the application**:
+   - **Backend API**: http://localhost:8000
+   - **API Docs**: http://localhost:8000/docs
+   - **Web UI**: http://localhost:3000
+
 ## Quick Start
 
 ### 1. Initialize the Framework
